@@ -3,65 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>ENEM MASTER ELITE</title>
+    <title>ENEM MASTER ELITE V2</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        :root { --primary: #3b82f6; --success: #10b981; --danger: #ef4444; --bg: #0b0f1a; }
-        body { background: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; color: white; overflow: hidden; background-image: radial-gradient(circle at top right, #1e293b, transparent), radial-gradient(circle at bottom left, #0f172a, transparent); }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 28px; }
-        .option-btn { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s ease; cursor: pointer; }
-        .option-btn.correct { background: rgba(16, 185, 129, 0.2) !important; border-color: var(--success) !important; box-shadow: 0 0 20px rgba(16, 185, 129, 0.2); }
-        .option-btn.wrong { background: rgba(239, 68, 68, 0.2) !important; border-color: var(--danger) !important; }
-        .progress-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.5s ease-out; }
-        #filter-overlay { backdrop-filter: blur(12px); background: rgba(11, 15, 26, 0.9); z-index: 100; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        
+        :root { --p: #3b82f6; --s: #10b981; --d: #ef4444; --bg: #030712; }
+        
+        body { 
+            background: var(--bg); font-family: 'Outfit', sans-serif; color: white; overflow: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+        }
+
+        /* Efeito Vidro Premium */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Botões de Alternativa Animados */
+        .opt-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .opt-card:active { transform: scale(0.98); }
+
+        .opt-card.correct { 
+            background: rgba(16, 185, 129, 0.15) !important; 
+            border-color: var(--s) !important;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.15);
+        }
+
+        .opt-card.wrong { 
+            background: rgba(239, 68, 68, 0.15) !important; 
+            border-color: var(--d) !important;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Barras de Status Modernas */
+        .stat-pill { background: rgba(255, 255, 255, 0.05); border-radius: 100px; padding: 6px 16px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        .progress-container { height: 4px; background: rgba(255,255,255,0.05); border-radius: 10px; width: 100%; }
+        .progress-glow { height: 100%; border-radius: 10px; box-shadow: 0 0 10px var(--p); transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        #filter-overlay { backdrop-filter: blur(30px); background: rgba(3, 7, 18, 0.8); z-index: 999; }
+        
+        .fade-in { animation: fadeInUp 0.6s ease-out forwards; opacity: 0; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body class="flex flex-col h-screen max-h-screen">
 
-    <div class="px-6 pt-8 pb-4">
-        <div class="flex justify-between items-end mb-4">
-            <div>
-                <h1 class="text-2xl font-800 tracking-tighter italic">ENEM<span class="text-blue-500">MASTER</span></h1>
-                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest" id="q-area">CARREGANDO...</p>
+    <div class="px-6 pt-10 pb-6">
+        <div class="flex justify-between items-center mb-6">
+            <div class="stat-pill flex items-center gap-3">
+                <i class="fas fa-bullseye text-blue-500"></i>
+                <span id="perc-label" class="text-sm font-800 tracking-tighter">0% ACERTOS</span>
             </div>
-            <div class="flex gap-4">
-                <div class="text-right">
-                    <p class="text-[9px] uppercase font-bold text-slate-500">Acertos</p>
-                    <p class="text-xl font-800 text-blue-400" id="perc-label">0%</p>
-                </div>
-                <button onclick="toggleFiltros()" class="w-12 h-12 glass-card flex items-center justify-center border-white/20 active:scale-90 transition">
-                    <i class="fas fa-sliders-h text-blue-400 text-sm"></i>
-                </button>
+            <button onclick="toggleFiltros()" class="w-12 h-12 glass-panel flex items-center justify-center active:scale-90 transition shadow-none border-white/10">
+                <i class="fas fa-sliders-h text-blue-400"></i>
+            </button>
+        </div>
+        <div class="progress-container">
+            <div id="perc-bar" class="progress-glow bg-blue-500" style="width: 0%"></div>
+        </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-6 no-scrollbar pb-32">
+        <div class="glass-panel p-8 mb-8 fade-in" style="animation-delay: 0.1s">
+            <div class="flex items-center gap-2 mb-4">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                <span id="q-area" class="text-[10px] font-800 text-slate-400 uppercase tracking-[0.2em]">CARREGANDO...</span>
+            </div>
+            <p id="q-text" class="text-xl font-400 leading-snug text-white/90"></p>
+            <div id="q-img-box" class="hidden mt-6">
+                <img id="q-img" src="" class="w-full rounded-2xl border border-white/5 shadow-2xl">
             </div>
         </div>
-        <div class="progress-bar">
-            <div id="perc-bar" class="progress-fill bg-blue-500" style="width: 0%"></div>
-        </div>
+
+        <div id="options-box" class="space-y-4 fade-in" style="animation-delay: 0.3s"></div>
     </div>
 
-    <div class="flex-1 overflow-y-auto px-6 no-scrollbar">
-        <div class="glass-card p-6 mb-6 mt-2 relative">
-            <p id="q-text" class="text-lg font-medium leading-snug text-slate-100 mb-4 italic">Buscando questão...</p>
-            <div id="q-img-box" class="hidden"><img id="q-img" src="" class="w-full rounded-2xl border border-white/10 mb-4"></div>
-        </div>
-        <div id="options-box" class="space-y-3 mb-28"></div>
+    <div id="action-bar" class="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-bg via-bg to-transparent hidden">
+        <button onclick="nextQuestion()" class="w-full bg-blue-600 py-6 rounded-3xl font-800 text-lg shadow-[0_20px_40px_rgba(59,130,246,0.3)] transition-all flex items-center justify-center gap-3">
+            PRÓXIMA QUESTÃO <i class="fas fa-arrow-right text-sm"></i>
+        </button>
     </div>
 
-    <div id="filter-overlay" class="fixed inset-0 hidden flex items-center justify-center p-6">
-        <div class="glass-card w-full max-w-sm p-8 border-blue-500/30">
-            <h2 class="text-xl font-bold mb-6 text-center">Ajustar Matérias</h2>
-            <div class="space-y-3 mb-8" id="materias-list"></div>
-            <button onclick="salvarEFiltar()" class="w-full bg-blue-600 py-4 rounded-2xl font-800 shadow-xl active:scale-95 transition">APLICAR</button>
+    <div id="filter-overlay" class="fixed inset-0 hidden flex items-center justify-center p-8">
+        <div class="glass-panel w-full max-w-sm p-10">
+            <h2 class="text-2xl font-800 mb-8 text-center tracking-tight">Estudos</h2>
+            <div class="space-y-4 mb-10" id="materias-list"></div>
+            <button onclick="salvarEFiltar()" class="w-full bg-blue-600 py-5 rounded-2xl font-800 shadow-xl">CONCLUÍDO</button>
         </div>
-    </div>
-
-    <div id="action-bar" class="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-bg hidden">
-        <button onclick="nextQuestion()" class="w-full bg-blue-600 py-5 rounded-[24px] font-800 text-lg shadow-2xl transition-all">PRÓXIMA QUESTÃO</button>
     </div>
 
     <script>
@@ -73,12 +128,12 @@
         let filtros = JSON.parse(localStorage.getItem('m_enem')) || ["Ciências da Natureza", "Ciências Humanas", "Linguagens e Códigos", "Matemática", "Geral"];
 
         function toggleFiltros() { document.getElementById('filter-overlay').classList.toggle('hidden'); renderFiltros(); }
-
+        
         function renderFiltros() {
             const list = document.getElementById('materias-list');
             const mats = ["Ciências da Natureza", "Ciências Humanas", "Linguagens e Códigos", "Matemática", "Geral"];
             list.innerHTML = mats.map(m => `
-                <label class="flex items-center justify-between p-4 glass-card border-white/5 cursor-pointer">
+                <label class="flex items-center justify-between p-5 glass-panel border-white/5 cursor-pointer rounded-2xl">
                     <span class="text-sm font-semibold">${m}</span>
                     <input type="checkbox" value="${m}" ${filtros.includes(m) ? 'checked' : ''} class="w-5 h-5 accent-blue-500">
                 </label>`).join('');
@@ -88,13 +143,12 @@
             const checks = document.querySelectorAll('#materias-list input:checked');
             filtros = Array.from(checks).map(c => c.value);
             localStorage.setItem('m_enem', JSON.stringify(filtros));
-            toggleFiltros();
-            nextQuestion();
+            toggleFiltros(); nextQuestion();
         }
 
         async function nextQuestion() {
             document.getElementById('action-bar').classList.add('hidden');
-            document.getElementById('options-box').innerHTML = '<div class="py-10 text-center opacity-50">Sorteando...</div>';
+            document.getElementById('options-box').innerHTML = '<div class="py-10 text-center opacity-30 text-xs tracking-widest uppercase">Gerando nova jornada...</div>';
             const { data } = await sb.from('questoes').select('*').in('materia', filtros);
             if(data && data.length > 0) {
                 qAtual = data[Math.floor(Math.random() * data.length)];
@@ -107,27 +161,29 @@
             document.getElementById('q-text').innerText = q.enunciado;
             const imgBox = document.getElementById('q-img-box'), img = document.getElementById('q-img');
             if(q.img_url) { img.src = q.img_url; imgBox.classList.remove('hidden'); } else { imgBox.classList.add('hidden'); }
+            
             const box = document.getElementById('options-box');
             box.innerHTML = '';
             ['a','b','c','d','e'].forEach(l => {
                 const btn = document.createElement('div');
-                btn.className = 'option-btn p-5 rounded-2xl flex items-center gap-4';
+                btn.className = 'opt-card p-6 flex items-center gap-5';
                 btn.onclick = () => check(l.toUpperCase(), btn);
-                btn.innerHTML = `<div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center font-800 text-sm border border-white/10">${l.toUpperCase()}</div>
-                                 <div class="text-sm font-medium flex-1 text-slate-300">${q['alt_'+l]}</div>`;
+                btn.innerHTML = `<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center font-800 text-sm border border-white/10">${l.toUpperCase()}</div>
+                                 <div class="text-[15px] font-400 flex-1 text-white/70">${q['alt_'+l]}</div>`;
                 box.appendChild(btn);
             });
         }
 
         function check(escolha, el) {
             const gab = qAtual.gabarito.toUpperCase();
-            const btns = document.querySelectorAll('.option-btn');
+            const btns = document.querySelectorAll('.opt-card');
             btns.forEach(b => b.onclick = null);
             if(escolha === gab) { el.classList.add('correct'); acertos++; }
             else { el.classList.add('wrong'); erros++; btns.forEach(b => { if(b.innerText.startsWith(gab)) b.classList.add('correct'); }); }
+            
             const total = acertos + erros;
             const p = Math.round((acertos / total) * 100);
-            document.getElementById('perc-label').innerText = p + "%";
+            document.getElementById('perc-label').innerText = p + "% ACERTOS";
             document.getElementById('perc-bar').style.width = p + "%";
             document.getElementById('action-bar').classList.remove('hidden');
         }
