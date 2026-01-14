@@ -26,8 +26,8 @@
             <i class="fas fa-brain text-blue-500 text-xl"></i>
             <h1 class="font-bold tracking-wider text-sm">ENEM MASTER</h1>
         </div>
-        <div class="bg-slate-800 px-3 py-1 rounded-full text-xs font-bold text-blue-400">
-            Biologia
+        <div class="bg-slate-800 px-3 py-1 rounded-full text-xs font-bold text-blue-400" id="materia-badge">
+            Geral
         </div>
     </div>
 
@@ -39,7 +39,7 @@
                 <span class="text-[10px] font-bold text-slate-500" id="q-ano">...</span>
             </div>
             <p class="text-lg font-medium leading-relaxed text-slate-200" id="q-enunciado">
-                Carregando sua questão...
+                Sorteando sua questão...
             </p>
         </div>
 
@@ -57,11 +57,8 @@
     </div>
 
     <script>
-        // CORREÇÃO: Usando nomes diferentes para evitar o travamento
         const urlDoBanco = "https://ramcjxqpsiyqeatuunig.supabase.co";
         const chaveDoBanco = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbWNqeHFwc2l5cWVhdHV1bmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3ODkyMDgsImV4cCI6MjA4MzM2NTIwOH0.kaskIarBgrF4iQS5CfSLhkxBPGq3F3h05SrzrHSHYZE";
-        
-        // Criando o cliente com um nome seguro
         const bancoDeDados = supabase.createClient(urlDoBanco, chaveDoBanco);
 
         let questaoAtual = null;
@@ -70,20 +67,22 @@
             document.getElementById('explanation-box').classList.add('hidden');
             document.getElementById('options-container').innerHTML = '<div class="flex justify-center p-4"><div class="loader"></div></div>';
             
-            // Busca a questão no banco de dados usando o nome novo
-            const { data, error } = await bancoDeDados.from('questoes').select('*').limit(1);
+            // --- CORREÇÃO AQUI: Removemos o .limit(1) ---
+            // Agora ele baixa o pacote todo e sorteia no seu celular
+            const { data, error } = await bancoDeDados.from('questoes').select('*');
             
             if (data && data.length > 0) {
+                // Sorteio Real
                 const random = Math.floor(Math.random() * data.length);
                 questaoAtual = data[random];
                 renderizar(questaoAtual);
             } else {
-                document.getElementById('q-enunciado').innerText = "Nenhuma questão encontrada! Use o Robô para adicionar.";
-                console.error(error); // Para debug se precisar
+                document.getElementById('q-enunciado').innerText = "Erro ao buscar questões ou banco vazio!";
             }
         }
 
         function renderizar(q) {
+            document.getElementById('materia-badge').innerText = q.materia || 'Geral'; // Atualiza o nome da matéria lá em cima
             document.getElementById('q-banca').innerText = q.banca || 'ENEM';
             document.getElementById('q-ano').innerText = q.ano || '2024';
             document.getElementById('q-enunciado').innerText = q.enunciado;
@@ -112,13 +111,12 @@
             if (!questaoAtual) return;
             const correta = questaoAtual.gabarito.toUpperCase();
             const todosBotoes = document.querySelectorAll('.btn-alt');
-            todosBotoes.forEach(b => b.onclick = null); // Trava cliques
+            todosBotoes.forEach(b => b.onclick = null);
 
             if (escolha === correta) {
                 elemento.classList.add('correct');
             } else {
                 elemento.classList.add('wrong');
-                // Tenta achar e marcar a correta visualmente
                 todosBotoes.forEach(b => {
                     if(b.innerText.includes(correta)) b.classList.add('correct');
                 });
