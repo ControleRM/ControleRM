@@ -57,9 +57,12 @@
     </div>
 
     <script>
-        const url = "https://ramcjxqpsiyqeatuunig.supabase.co";
-        const key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbWNqeHFwc2l5cWVhdHV1bmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3ODkyMDgsImV4cCI6MjA4MzM2NTIwOH0.kaskIarBgrF4iQS5CfSLhkxBPGq3F3h05SrzrHSHYZE";
-        const supabase = supabase.createClient(url, key);
+        // CORREÇÃO: Usando nomes diferentes para evitar o travamento
+        const urlDoBanco = "https://ramcjxqpsiyqeatuunig.supabase.co";
+        const chaveDoBanco = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbWNqeHFwc2l5cWVhdHV1bmlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3ODkyMDgsImV4cCI6MjA4MzM2NTIwOH0.kaskIarBgrF4iQS5CfSLhkxBPGq3F3h05SrzrHSHYZE";
+        
+        // Criando o cliente com um nome seguro
+        const bancoDeDados = supabase.createClient(urlDoBanco, chaveDoBanco);
 
         let questaoAtual = null;
 
@@ -67,8 +70,8 @@
             document.getElementById('explanation-box').classList.add('hidden');
             document.getElementById('options-container').innerHTML = '<div class="flex justify-center p-4"><div class="loader"></div></div>';
             
-            // Busca a questão no banco de dados
-            const { data, error } = await supabase.from('questoes').select('*').limit(1);
+            // Busca a questão no banco de dados usando o nome novo
+            const { data, error } = await bancoDeDados.from('questoes').select('*').limit(1);
             
             if (data && data.length > 0) {
                 const random = Math.floor(Math.random() * data.length);
@@ -76,6 +79,7 @@
                 renderizar(questaoAtual);
             } else {
                 document.getElementById('q-enunciado').innerText = "Nenhuma questão encontrada! Use o Robô para adicionar.";
+                console.error(error); // Para debug se precisar
             }
         }
 
